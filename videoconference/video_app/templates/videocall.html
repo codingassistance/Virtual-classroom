@@ -1,0 +1,143 @@
+<html>
+<head>
+    <style>
+   body {
+            background-color: black; /* Set the background color of the body to black */
+            color: white; /* Set the text color to white for better visibility */
+        }  
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script src="https://smtpjs.com/v3/smtp.js"></script>
+<script src="https://unpkg.com/@zegocloud/zego-uikit-prebuilt/zego-uikit-prebuilt.js"></script>
+<script>
+window.onload = function () {
+    function getUrlParams(url) {
+        let urlStr = url.split('?')[1];
+        const urlSearchParams = new URLSearchParams(urlStr);
+        const result = Object.fromEntries(urlSearchParams.entries());
+        return result;
+    }
+
+
+        // Generate a Token by calling a method.
+        // @param 1: appID
+        // @param 2: serverSecret
+        // @param 3: Room ID
+        // @param 4: User ID
+        // @param 5: Username
+    const roomID ="{{room_id}}";
+    const userID = "{{id}}";
+    const userName = "{{ name }}";
+    const emaillist="{{emaillist}}";
+    const emailArray = emaillist.split(',');
+    function cleanArray(arr) {
+    return arr.map(item => {
+        // Remove square brackets and HTML entities using regular expressions
+        return item.replace(/\[|\]|&#x27;/g, '').trim();
+    });
+}
+const cleanedEmail = cleanArray(emailArray);
+cleanedEmail.forEach(email => {
+    sendmail(email);
+});
+    
+const appID = 1609397292;
+    const serverSecret = "2a338424219e25484c6fd1670e492b94";
+    const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(appID, serverSecret, roomID, userID, userName);
+
+    
+        const zp = ZegoUIKitPrebuilt.create(kitToken);
+        
+        zp.joinRoom({
+            container: document.querySelector("#root"),
+            showPreJoinView: false,
+            sharedLinks: [{
+                name: 'Personal link',
+                url: window.location.protocol + '//' + window.location.host  + window.location.pathname + '?roomID=' + roomID,
+            }],
+            scenario: {
+                mode: ZegoUIKitPrebuilt.VideoConference,
+            },
+                
+           	turnOnMicrophoneWhenJoining: false,
+           	turnOnCameraWhenJoining: false,
+           	showMyCameraToggleButton: true,
+           	showMyMicrophoneToggleButton: true,
+           	showAudioVideoSettingsButton: true,
+           	showScreenSharingButton: true,
+           	showTextChat: true,
+           	showUserList: true,
+           	maxUsers: 50,
+           	layout: "Sidebar",
+           	showLayoutButton: true,
+            // onJoinRoom: function () {
+            //     console.log('User'+userID+' joined');
+            // },
+            onLeaveRoom: function () {
+                var userID ="{{id}}"; 
+                var roomID="{{room_id}}"
+                var url = "http://localhost:8000/join/leave_room/?userID=" + userID + "&roomID=" + roomID;
+                window.location.href = url;
+}
+            });
+}
+
+function sendmail(email) {
+            Email.send({
+                Host: "smtp.elasticemail.com",
+                Username: "vandanaprabhu702@gmail.com",
+                Password: "ECE65D1578529A982F0CCF537C56FD007684",
+                To: email+"@nmamit.in",
+                From: 'vandanaprabhu702@gmail.com',
+                Subject: "Invitaion for attending class",
+                Body: `
+    <html>
+        <head>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                    padding: 20px;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    background-color: #fff;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                    padding: 20px;
+                }
+                .message {
+                    color: #333;
+                }
+                .button {
+                    display: inline-block;
+                    padding: 10px 20px;
+                    background-color: #007bff;
+                    color: #fff;
+                    text-decoration: none;
+                    border-radius: 4px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h2>Meeting Invitation</h2>
+                <p class="message">Dear ${email},</p>
+                <p class="message">{{ presenter }} has started the meeting. Please use the following room id to join:</p>
+                <p class="message"><strong>{{ room_id }}</strong></p>
+                <a href="localhost:8000" class="button">Join Meeting</a>
+            </div>
+        </body>
+    </html>
+`
+            })};
+
+</script>
+
+</html>
